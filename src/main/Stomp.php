@@ -438,10 +438,14 @@ class Stomp
     public function ack ($message, $transactionId = null)
     {
         if ($message instanceof StompFrame) {
-            $headers = $message->headers;
+            // rabbitmq stomp hack - we should only pass message id not content-length
+            $headers = array(
+                'message-id' => $message->headers['message-id']
+            );
+
             if (isset($transactionId)) {
                 $headers['transaction'] = $transactionId;
-            }			
+            }
             $frame = new StompFrame('ACK', $headers);
             $this->_writeFrame($frame);
             return true;
